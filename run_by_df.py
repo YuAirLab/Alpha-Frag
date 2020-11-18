@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 '''
 @File   :   example.py
-@Author :   馒头
+@Author :   song
 @Time   :   2020/10/01
 @Contact:   songjian@westlake.edu.cn
 @intro  :   demo
