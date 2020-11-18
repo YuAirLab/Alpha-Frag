@@ -15,7 +15,7 @@ A [GPU with CUDA support](https://developer.nvidia.com/cuda-gpus)
 1. Sequences with amino acid [BJOUXZ] are not supported.
 2. Each C is treated as Cysteine with carbamidomethylation.
 3. Modifications except "M(ox)" are not supported.
-M(ox) should rewrite as 'm'.
+M(ox) should be written as 'm'.
 4. The length of peptide should be between 7 and 30.
 5. The precursor charge should be between 1 and 4.
 6. Output such as 'y10_2' means 'y' type ions and cleavage size at 10 with charge 2. More than 2 charges fragment ion is not considered.
