@@ -33,7 +33,7 @@ ACDEFGHIKLMmNPQRSTVWYK_2: y1_1;y2_1;y3_1;y8_1;y9_1;y10_1;y11_1;y12_1;y13_1;y14_1
 
 The input DataFrame should include 'simple_seq' and 'pr_charge' columns.
 
-see [example.py](https://github.com/YuAirLab/Alpha-Frag/)
+see [run_by_df.py](https://github.com/YuAirLab/Alpha-Frag/blob/master/run_by_df.py)
 
 
 
