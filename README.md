@@ -10,12 +10,6 @@ A [GPU with CUDA support](https://developer.nvidia.com/cuda-gpus)
 
 - [PyTorch](https://pytorch.org/get-started/locally/#windows-anaconda) 1.0.0+
 
-## Train
-You can use the trained model or train by youself:
-```shell script
-python train.py
-```
-
 ## Example
 
 1. Sequences with amino acid [BJOUXZ] are not supported.
