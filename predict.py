@@ -10,6 +10,7 @@
 import operator
 import numpy as np
 import torch
+import operator
 import predifine
 
 def get_theory_mask(pr_charge_range, seq_len_range):
@@ -75,7 +76,13 @@ def predict_anno(df, model):
     m = []
 
     mask_dict = get_theory_mask(pr_charge_range=[1, 2, 3, 4], seq_len_range=range(7, 31))
-    mask = np.vstack(df.apply(lambda row: mask_dict[(row.pr_charge, row.seq_len)], axis=1)).astype(np.int8)
+    pr_charge_v = df['pr_charge'].values
+    seq_len_v = df['seq_len'].values
+    key_v = list(zip(pr_charge_v, seq_len_v))
+
+    f = operator.itemgetter(*key_v)
+    mask = f(mask_dict)
+    mask = np.vstack(mask)
 
     for _, df_batch in df.groupby(df.index // 10000):
         df_batch = df_batch.reset_index(drop=True)
