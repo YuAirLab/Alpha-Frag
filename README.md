@@ -9,6 +9,8 @@ A [GPU with CUDA support](https://developer.nvidia.com/cuda-gpus)
 ## Package
 
 - [PyTorch](https://pytorch.org/get-started/locally/#windows-anaconda) 1.0.0+
+- [numba](https://numba.pydata.org/numba-doc/latest/index.html)
+- [pyteomics](https://pyteomics.readthedocs.io/en/latest/)
 
 ## Example
 
@@ -35,5 +37,12 @@ The input DataFrame should include 'simple_seq' and 'pr_charge' columns.
 
 see [run_by_df.py](https://github.com/YuAirLab/Alpha-Frag/blob/master/run_by_df.py)
 
-
-
+## Application 
+One of the application for Alpha-Frag is constructing the qualitative and quantitative scores to improve the identification based on the output of OpenSWATH.
+1. Make a workspace folder containing:
+    - *.mzML
+    - osw.tsv (the output by OpenSWATH v2.4.0 and named with osw.tsv)
+2. Run:
+    ```shell script
+   python run_scoring your_workspace_dir 
+   ```

@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 '''
 @File   :   predict.py
-@Author :   song
+@Author :   Song
 @Time   :   2020/10/01
 @Contact:   songjian@westlake.edu.cn
 @intro  :   predict
@@ -10,7 +10,6 @@
 import operator
 import numpy as np
 import torch
-import operator
 import predifine
 
 def get_theory_mask(pr_charge_range, seq_len_range):
@@ -26,7 +25,7 @@ def get_theory_mask(pr_charge_range, seq_len_range):
                 fg_len = int(anno_split[0][1:])
                 fg_charge = int(anno_split[-1])
 
-                if (fg_len < seq_len and fg_charge <= pr_charge):
+                if (fg_len < seq_len and fg_charge <= pr_charge and fg_charge <= 2):
                     mask[i] = 1
             mask_dict[key] = mask
     return mask_dict
@@ -76,6 +75,21 @@ def predict_anno(df, model):
     m = []
 
     mask_dict = get_theory_mask(pr_charge_range=[1, 2, 3, 4], seq_len_range=range(7, 31))
+    mask = np.vstack(df.apply(lambda row: mask_dict[(row.pr_charge, row.seq_len)], axis=1)).astype(np.int8)
+
+    for _, df_batch in df.groupby(df.index // 10000):
+        df_batch = df_batch.reset_index(drop=True)
+        batch_frag = predict_batch_anno(df_batch, model)
+        m.append(batch_frag)
+        torch.cuda.empty_cache()
+
+    m = np.concatenate(m)
+    m = m * mask
+
+    return m
+
+def get_pred_probability(df, model):
+    mask_dict = get_theory_mask(pr_charge_range=[1, 2, 3, 4], seq_len_range=range(7, 31))
     pr_charge_v = df['pr_charge'].values
     seq_len_v = df['seq_len'].values
     key_v = list(zip(pr_charge_v, seq_len_v))
@@ -84,11 +98,29 @@ def predict_anno(df, model):
     mask = f(mask_dict)
     mask = np.vstack(mask)
 
-    for _, df_batch in df.groupby(df.index // 10000):
+    m = []
+    for _, df_batch in df.groupby(df.index // 3000):
         df_batch = df_batch.reset_index(drop=True)
-        batch_frag = predict_batch_anno(df_batch, model)
-        m.append(batch_frag)
+        paded_idx, seq_len_max = pad_seq_to_idx(df_batch.simple_seq, df_batch.seq_len)
+        seq_len = df_batch.seq_len.values
+
+        device = torch.device('cuda:{}'.format(0))
+        paded_idx = torch.tensor(paded_idx, dtype=torch.long, device=device)
+        paded_idx = paded_idx.view(len(df_batch), -1)
+        seq_len = torch.tensor(seq_len, dtype=torch.int8, device=device)
+
+        batch_charges = torch.tensor(df_batch.pr_charge.to_numpy() - 1).long().to(device)
+
+        # predict
+        with torch.no_grad():
+            output_frag = model(paded_idx, seq_len, batch_charges)
+            output_frag = torch.sigmoid(output_frag)
+
+        batch_pred = output_frag.cpu().numpy()
+        m.append(batch_pred)
         torch.cuda.empty_cache()
+        print('\r{:<30}{} finished'.format('[Predicting]', sum(map(len, m))), end='', flush=True)
+    print('\r')
 
     m = np.concatenate(m)
     m = m * mask
